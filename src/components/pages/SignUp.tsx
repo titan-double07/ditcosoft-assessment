@@ -8,10 +8,9 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { agentCode, securityKey } from "@/lib/constants";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
-import md5 from "md5";
-import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { FcGoogle } from "react-icons/fc";
 import { Link, useNavigate } from "react-router-dom";
@@ -37,11 +36,8 @@ export type SignupFormData = z.infer<typeof formSchema>;
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
 
-  const agentCode = "TBC";
-  const staticToken = "eyJyNzMyZTEzNGMyMTg5NTEiiOjE1ODAzODQyNTA3MDN9";
+  // the fetch did not seem to waork bcause of a cors error
 
-  // Generate the Security-Key
-  const securityKey = `${md5(agentCode)} | ${staticToken}`;
 
   async function signupUser(userData: SignupFormData) {
     try {
@@ -71,32 +67,6 @@ const SignupPage: React.FC = () => {
     }
   }
 
-  async function fetchDashboardData() {
-    try {
-      // Make the GET request to the dashboard endpoint
-      const response = await fetch(
-        "https://datacliqq.ditcosoft.com/apis?requestType=DASHBRD",
-        {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            "Security-Key": securityKey,  
-          },
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status} ${response.statusText}`);
-      }
-
-      const data = await response.json();
-      console.log("🚀 ~ fetchDashboardData ~ data:", data);
-      return data;
-    } catch (e) {
-      console.error("🚀 ~ fetchDashboardData ~ e:", e);
-      throw new Error(e instanceof Error ? e.message : String(e));
-    }
-  }
 
   // React Hook Form Setup
   const form = useForm<SignupFormData>({
@@ -130,18 +100,7 @@ const SignupPage: React.FC = () => {
     signUp.mutate(data);
   };
 
-  // useEffect(() => {
-  //   async function loadDashboardData() {
-  //     try {
-  //       const data = await fetchDashboardData();
-  //       console.log("Dashboard data:", data);
-  //     } catch (error) {
-  //       console.error("Failed to fetch dashboard data:", error);
-  //     }
-  //   }
 
-  //   loadDashboardData();
-  // }, []);
 
   return (
     <div className="bg-gradient-to-br from-[#6d10b8] to-[#01040e] flex items-center justify-center h-screen w-full md:p-10 p-5">

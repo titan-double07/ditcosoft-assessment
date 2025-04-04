@@ -13,8 +13,51 @@ import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { useNavigate } from "react-router-dom";
 import { Barchart } from "../base/BarChart";
+import { useEffect } from "react";
+import { securityKey } from "@/lib/constants";
 
 export default function Dashboard() {
+
+  // the fetch did not seem to waork bcause of a cors error, did not get feedback on where to includde the requestType
+  async function fetchDashboardData() {
+    try {
+      // Make the GET request to the dashboard endpoint
+      const response = await fetch(
+        "https://datacliqq.ditcosoft.com/apis?requestType=DASHBRD",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Security-Key": securityKey,
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("🚀 ~ fetchDashboardData ~ data:", data);
+      return data;
+    } catch (e) {
+      console.error("🚀 ~ fetchDashboardData ~ e:", e);
+      throw new Error(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  useEffect(() => {
+    async function loadDashboardData() {
+      try {
+        const data = await fetchDashboardData();
+        console.log("Dashboard data:", data);
+      } catch (error) {
+        console.error("Failed to fetch dashboard data:", error);
+      }
+    }
+
+    loadDashboardData();
+  }, []);
   return (
     <SidebarProvider>
       {/* dashboard sidebar */}
