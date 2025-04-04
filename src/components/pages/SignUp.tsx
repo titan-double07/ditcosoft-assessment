@@ -1,7 +1,3 @@
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import {
@@ -11,9 +7,15 @@ import {
   FormItem,
   FormMessage,
 } from "@/components/ui/form";
-import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+import { Input } from "@/components/ui/input";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
+import md5 from "md5";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { FcGoogle } from "react-icons/fc";
+import { Link, useNavigate } from "react-router-dom";
+import * as z from "zod";
 
 // Define validation schema
 const formSchema = z.object({
@@ -32,31 +34,69 @@ const formSchema = z.object({
 // Define TypeScript type from schema
 export type SignupFormData = z.infer<typeof formSchema>;
 
-// Mock API function (Replace with actual API call)
-async function signupUser(userData: SignupFormData) {
-  const response = await fetch("https://datacliqq.ditcosoft.com/apis", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Security-Key":
-        "d73be1ccc41a54d6932909c094a0ccc9 | eyJyNzMyZTEzNGMyMTg5NTEiiOjE1ODAzODQyNTA3MDN9",
-    },
-    body: JSON.stringify({
-      requestType: "REGT",
-      userMail: userData.email,
-      userPassword: userData.password,
-      userFullname: `${userData.firstName} ${userData.lastName}`,
-      userPhone: userData.phone,
-      agentCode: "TBC",
-      userAgent: navigator.userAgent,
-    }),
-  });
-  console.log("🚀 ~ signupUser ~ response:", response)
-  return response.json();
-}
-
 const SignupPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const agentCode = "TBC";
+  const staticToken = "eyJyNzMyZTEzNGMyMTg5NTEiiOjE1ODAzODQyNTA3MDN9";
+
+  // Generate the Security-Key
+  const securityKey = `${md5(agentCode)} | ${staticToken}`;
+
+  async function signupUser(userData: SignupFormData) {
+    try {
+      console.log("🚀 ~ signupUser ~ securityKey:", securityKey);
+      const response = await fetch("https://datacliqq.ditcosoft.com/apis", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Security-Key": securityKey,
+        },
+        body: JSON.stringify({
+          requestType: "REGT",
+          userMail: userData.email,
+          userPassword: userData.password,
+          userFullname: `${userData.firstName} ${userData.lastName}`,
+          userPhone: userData.phone,
+          agentCode: agentCode,
+          userAgent: navigator.userAgent,
+        }),
+      });
+
+      console.log("🚀 ~ signupUser ~ response:", response.json());
+      return response.json();
+    } catch (e) {
+      console.error("🚀 ~ signupUser ~ e:", e);
+      throw new Error(e instanceof Error ? e.message : String(e));
+    }
+  }
+
+  async function fetchDashboardData() {
+    try {
+      // Make the GET request to the dashboard endpoint
+      const response = await fetch(
+        "https://datacliqq.ditcosoft.com/apis?requestType=DASHBRD",
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Security-Key": securityKey,  
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error: ${response.status} ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      console.log("🚀 ~ fetchDashboardData ~ data:", data);
+      return data;
+    } catch (e) {
+      console.error("🚀 ~ fetchDashboardData ~ e:", e);
+      throw new Error(e instanceof Error ? e.message : String(e));
+    }
+  }
 
   // React Hook Form Setup
   const form = useForm<SignupFormData>({
@@ -70,24 +110,38 @@ const SignupPage: React.FC = () => {
     },
   });
 
-  // TanStack Query Mutation
-  const mutation = useMutation({
+  // sign in user
+  const signUp = useMutation({
     mutationFn: signupUser,
-    onSuccess: () => {
-      console.log("Signup successful");
+    onSuccess: (data) => {
+      console.log("Signup successful", data);
       navigate("/admin"); // Navigate after successful signup
     },
     onError: (error) => {
       console.error("Signup failed:", error);
+       navigate("/admin"); 
     },
   });
 
   // Form submission handler
   const onSubmit = (data: SignupFormData) => {
-    console.log("🚀 ~ onSubmit ~ data:", data)
-    
-    mutation.mutate(data);
+    console.log("🚀 ~ onSubmit ~ data:", data);
+
+    signUp.mutate(data);
   };
+
+  // useEffect(() => {
+  //   async function loadDashboardData() {
+  //     try {
+  //       const data = await fetchDashboardData();
+  //       console.log("Dashboard data:", data);
+  //     } catch (error) {
+  //       console.error("Failed to fetch dashboard data:", error);
+  //     }
+  //   }
+
+  //   loadDashboardData();
+  // }, []);
 
   return (
     <div className="bg-gradient-to-br from-[#6d10b8] to-[#01040e] flex items-center justify-center h-screen w-full md:p-10 p-5">
@@ -219,8 +273,8 @@ const SignupPage: React.FC = () => {
                 <Button
                   type="submit"
                   className="w-full bg-green-600 hover:bg-green-700"
-                  disabled={mutation.isPending}>
-                  {mutation.isPending ? "Signing up..." : "Agree and Continue"}
+                  disabled={signUp.isPending}>
+                  {signUp.isPending ? "Signing up..." : "Agree and Continue"}
                 </Button>
               </form>
             </Form>
