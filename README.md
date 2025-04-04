@@ -1,54 +1,48 @@
-# React + TypeScript + Vite
+## Getting Started
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+To get started with the Vite React TypeScript app, follow these steps:
 
-Currently, two official plugins are available:
+### Prerequisites
+- Ensure you have [Node.js](https://nodejs.org/) installed (version 14 or higher is recommended).
+- Install a package manager like npm or yarn.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+### Installation
+1. Clone the repository:
+  ```bash
+  git clone https://github.com/your-repo/ditcosoft-assessment.git
+  ```
+2. Navigate to the project directory:
+  ```bash
+  cd ditcosoft-assessment
+  ```
+3. Install dependencies:
+  ```bash
+  npm install
+  ```
+  or if you use yarn:
+  ```bash
+  yarn install
+  ```
 
-## Expanding the ESLint configuration
+### Running the Development Server
+Start the development server:
+```bash
+npm run dev
+```
+or with yarn:
+```bash
+yarn dev
+```
+The app will be available at `http://localhost:3000`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+### Building for Production
+To build the app for production:
+```bash
+npm run build
+```
+or with yarn:
+```bash
+yarn build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
